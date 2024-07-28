@@ -22,7 +22,7 @@ public class AuthenticationController : ControllerBase
     // Note that the capitalization doesn't break because when the params are grabbed from the body...
     // it'll know to be case insensitive or maybe it just looks for userName and password, but either way same difference
     public record AuthenticationData(string? UserName, string? Password);
-    public record UserData(int UserId, string UserName);
+    public record UserData(int UserId, string UserName, string Title, string EmployeeId);
 
     // api/Authentication/token
     [HttpPost("token")]
@@ -48,6 +48,9 @@ public class AuthenticationController : ControllerBase
         List<Claim> claims = new();
         claims.Add(new(JwtRegisteredClaimNames.Sub, user.UserId.ToString()));
         claims.Add(new(JwtRegisteredClaimNames.UniqueName, user.UserName));
+        claims.Add(new("title", user.Title));
+        claims.Add(new("employeeId", user.EmployeeId));
+
 
         var token = new JwtSecurityToken(
             _config.GetValue<string>("Authentication:Issuer"),
@@ -68,13 +71,13 @@ public class AuthenticationController : ControllerBase
         if (CompareValues(data.UserName, "dmorris")
             && CompareValues(data.Password, "Test123"))
         {
-            return new UserData(1, data.UserName!);
+            return new UserData(1, data.UserName!, "Business Owner", "E001");
         }
 
         if (CompareValues(data.UserName, "sstorm")
             && CompareValues(data.Password, "Test123"))
         {
-            return new UserData(2, data.UserName!);
+            return new UserData(2, data.UserName!, "Head of Security", "E005");
         }
 
         return null;
